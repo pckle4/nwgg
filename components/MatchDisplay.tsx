@@ -124,7 +124,7 @@ export const MatchDisplay: React.FC<Props> = ({ matchState, players, bowlingTeam
         {/* CONTROLS (Full Width Mobile / 50% Desktop - Left Side) */}
         <div className="order-2 lg:order-1 flex flex-col gap-3 justify-center h-full">
             {/* ACTION BUTTONS */}
-            <div className="grid grid-cols-2 gap-3 lg:gap-4 h-32 lg:h-64">
+            <div className="grid grid-cols-2 gap-3 lg:gap-4 h-28 lg:h-48">
                 <button 
                   onClick={() => handleActionClick('safe')}
                   disabled={isProcessing}
@@ -158,7 +158,7 @@ export const MatchDisplay: React.FC<Props> = ({ matchState, players, bowlingTeam
         </div>
 
         {/* VISUALIZER (Full Width Mobile / 50% Desktop - Right Side) */}
-        <div className="order-1 lg:order-2 flex flex-col relative h-full min-h-[200px] lg:min-h-[400px]">
+        <div className="order-1 lg:order-2 flex flex-col relative h-full min-h-[180px] lg:min-h-[300px]">
              
              {/* DESKTOP: Overlay Context (Pitch/FreeHit) */}
              <div className="hidden lg:flex absolute top-4 right-4 z-20 gap-2">
@@ -169,14 +169,14 @@ export const MatchDisplay: React.FC<Props> = ({ matchState, players, bowlingTeam
              </div>
 
              <div className="flex-1 bg-slate-50 rounded-xl border border-slate-100 relative flex items-center justify-center overflow-hidden group shadow-inner">
-                 <div className={`relative z-10 w-24 h-24 lg:w-40 lg:h-40 rounded-full flex items-center justify-center text-4xl lg:text-7xl font-display font-bold shadow-xl transition-all duration-300 ease-out transform ${resultColor} ${resultScale} ${animationClass} ${lastBall ? 'opacity-100' : 'opacity-0 scale-50'}`}>
+                 <div className={`relative z-10 w-20 h-20 lg:w-32 lg:h-32 rounded-full flex items-center justify-center text-3xl lg:text-6xl font-display font-bold shadow-xl transition-all duration-300 ease-out transform ${resultColor} ${resultScale} ${animationClass} ${lastBall ? 'opacity-100' : 'opacity-0 scale-50'}`}>
                    {lastBall}
                    {lastDetail && <div className="absolute -bottom-5 lg:-bottom-6 left-1/2 transform -translate-x-1/2 text-[9px] lg:text-[10px] bg-gray-900 text-white px-2 py-0.5 rounded-full whitespace-nowrap shadow-md z-20">{lastDetail}</div>}
                 </div>
                 
                 {/* Decoration Rings */}
-                <div className="absolute w-40 h-40 lg:w-72 lg:h-72 border border-gray-200 rounded-full animate-ping-slow opacity-20"></div>
-                <div className="absolute w-60 h-60 lg:w-[28rem] lg:h-[28rem] border border-gray-100 rounded-full opacity-10"></div>
+                <div className="absolute w-32 h-32 lg:w-60 lg:h-60 border border-gray-200 rounded-full animate-ping-slow opacity-20"></div>
+                <div className="absolute w-48 h-48 lg:w-80 lg:h-80 border border-gray-100 rounded-full opacity-10"></div>
 
                  {/* Commentary Bubble */}
                 {matchState.commentary && (
