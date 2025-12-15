@@ -26,12 +26,33 @@ export const MatchDisplay: React.FC<Props> = ({ matchState, players, bowlingTeam
 
   let resultColor = 'bg-gray-100 text-gray-400';
   let resultScale = 'scale-100';
+  let animationClass = '';
 
-  if (lastBall === '6') { resultColor = 'bg-green-500 text-white shadow-lg shadow-green-500/50'; resultScale = 'scale-110'; }
-  else if (lastBall === '4') { resultColor = 'bg-blue-500 text-white shadow-lg shadow-blue-500/50'; resultScale = 'scale-105'; }
-  else if (lastBall === 'W') { resultColor = 'bg-red-600 text-white shadow-lg shadow-red-600/50'; resultScale = 'scale-100'; }
-  else if (lastBall === 'NB' || lastBall === 'wd') { resultColor = 'bg-orange-500 text-white'; }
-  else if (lastBall && parseInt(lastBall) > 0) { resultColor = 'bg-gray-800 text-white'; }
+  if (lastBall === '6') { 
+      resultColor = 'bg-green-500 text-white shadow-lg shadow-green-500/50'; 
+      resultScale = 'scale-110';
+      animationClass = 'animate-bounce-short';
+  }
+  else if (lastBall === '4') { 
+      resultColor = 'bg-blue-500 text-white shadow-lg shadow-blue-500/50'; 
+      resultScale = 'scale-105'; 
+      animationClass = 'animate-bounce-short';
+  }
+  else if (lastBall === 'W') { 
+      resultColor = 'bg-red-600 text-white shadow-lg shadow-red-600/50'; 
+      resultScale = 'scale-100'; 
+      animationClass = 'animate-shake';
+  }
+  else if (lastBall === 'NB' || lastBall === 'wd') { 
+      resultColor = 'bg-orange-500 text-white'; 
+  }
+  else if (lastBall === '0') {
+      resultColor = 'bg-gray-700 text-white';
+      if (lastDetail) animationClass = 'animate-shake'; // Shake on close calls/swings
+  }
+  else if (lastBall && parseInt(lastBall) > 0) { 
+      resultColor = 'bg-gray-800 text-white'; 
+  }
 
   const isGameOver = matchState.status === 'WON' || matchState.status === 'LOST';
   const isTied = matchState.status === 'TIED';
@@ -148,7 +169,7 @@ export const MatchDisplay: React.FC<Props> = ({ matchState, players, bowlingTeam
              </div>
 
              <div className="flex-1 bg-slate-50 rounded-xl border border-slate-100 relative flex items-center justify-center overflow-hidden group shadow-inner">
-                 <div className={`relative z-10 w-24 h-24 lg:w-40 lg:h-40 rounded-full flex items-center justify-center text-4xl lg:text-7xl font-display font-bold shadow-xl transition-all duration-300 ease-out transform ${resultColor} ${resultScale} ${lastBall ? 'opacity-100' : 'opacity-0 scale-50'}`}>
+                 <div className={`relative z-10 w-24 h-24 lg:w-40 lg:h-40 rounded-full flex items-center justify-center text-4xl lg:text-7xl font-display font-bold shadow-xl transition-all duration-300 ease-out transform ${resultColor} ${resultScale} ${animationClass} ${lastBall ? 'opacity-100' : 'opacity-0 scale-50'}`}>
                    {lastBall}
                    {lastDetail && <div className="absolute -bottom-5 lg:-bottom-6 left-1/2 transform -translate-x-1/2 text-[9px] lg:text-[10px] bg-gray-900 text-white px-2 py-0.5 rounded-full whitespace-nowrap shadow-md z-20">{lastDetail}</div>}
                 </div>
