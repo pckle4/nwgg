@@ -84,7 +84,7 @@ export const MatchDisplay: React.FC<Props> = ({ matchState, players, bowlingTeam
   return (
     <div className="flex flex-col gap-3 h-full">
       
-      {/* MOBILE: Context Bar (Hidden on Desktop, moved to Control Panel) */}
+      {/* MOBILE: Context Bar (Hidden on Desktop) */}
       <div className="flex lg:hidden justify-between items-center px-1 shrink-0">
          <div className="flex gap-2">
             <span className={`px-2 py-1 rounded text-[10px] font-bold border ${matchState.pitchType === 'GREEN' ? 'bg-green-50 border-green-200 text-green-700' : matchState.pitchType === 'DUSTY' ? 'bg-amber-50 border-amber-200 text-amber-800' : 'bg-slate-50 border-slate-200 text-slate-700'}`}>
@@ -98,71 +98,20 @@ export const MatchDisplay: React.FC<Props> = ({ matchState, players, bowlingTeam
       </div>
 
       {/* MAIN CONTENT AREA */}
-      <div className="flex-1 grid grid-cols-1 lg:grid-cols-12 gap-3 lg:gap-6">
+      <div className="flex-1 grid grid-cols-1 lg:grid-cols-2 gap-3 lg:gap-6">
         
-        {/* VISUALIZER (Full Width Mobile / 65% Desktop) */}
-        <div className="lg:col-span-8 flex flex-col relative">
-             
-             {/* DESKTOP: Overlay Context (Pitch/FreeHit) */}
-             <div className="hidden lg:flex absolute top-4 left-4 z-20 gap-2">
-                 <span className={`px-3 py-1 rounded-full text-xs font-bold border backdrop-blur-sm bg-white/80 ${matchState.pitchType === 'GREEN' ? 'text-green-700 border-green-200' : matchState.pitchType === 'DUSTY' ? 'text-amber-800 border-amber-200' : 'text-slate-700 border-slate-200'}`}>
-                    {matchState.pitchType} PITCH
-                 </span>
-                 {matchState.isFreeHit && <span className="px-3 py-1 rounded-full text-xs font-bold bg-red-500 text-white shadow-sm animate-pulse">FREE HIT</span>}
-             </div>
-
-             <div className="flex-1 bg-slate-50 rounded-xl border border-slate-100 relative flex items-center justify-center overflow-hidden group shadow-inner min-h-[160px] lg:min-h-[380px]">
-                 <div className={`relative z-10 w-24 h-24 lg:w-32 lg:h-32 rounded-full flex items-center justify-center text-4xl lg:text-6xl font-display font-bold shadow-xl transition-all duration-300 ease-out transform ${resultColor} ${resultScale} ${lastBall ? 'opacity-100' : 'opacity-0 scale-50'}`}>
-                   {lastBall}
-                   {lastDetail && <div className="absolute -bottom-5 lg:-bottom-6 left-1/2 transform -translate-x-1/2 text-[9px] lg:text-[10px] bg-gray-900 text-white px-2 py-0.5 rounded-full whitespace-nowrap shadow-md z-20">{lastDetail}</div>}
-                </div>
-                
-                {/* Decoration Rings */}
-                <div className="absolute w-40 h-40 lg:w-64 lg:h-64 border border-gray-200 rounded-full animate-ping-slow opacity-20"></div>
-                <div className="absolute w-60 h-60 lg:w-96 lg:h-96 border border-gray-100 rounded-full opacity-10"></div>
-
-                 {/* Commentary Bubble */}
-                {matchState.commentary && (
-                   <div className="absolute bottom-4 lg:bottom-8 w-full text-center px-4 transition-all duration-300 z-20">
-                     <span className="inline-block bg-white/95 backdrop-blur-md border border-gray-200 text-gray-800 px-3 py-1.5 lg:px-6 lg:py-2.5 rounded-xl text-xs lg:text-base font-medium shadow-sm max-w-full lg:max-w-2xl">
-                       {matchState.commentary}
-                     </span>
-                   </div>
-                 )}
-            </div>
-        </div>
-
-        {/* CONTROLS (Full Width Mobile / 35% Desktop) */}
-        <div className="lg:col-span-4 flex flex-col gap-3">
-            
-            {/* DESKTOP: Match Stats Card */}
-            <div className="hidden lg:flex flex-col bg-white p-5 rounded-xl border border-blue-50 shadow-sm gap-2">
-                 <div className="flex justify-between items-end">
-                     <div className="flex flex-col">
-                        <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Required Rate</span>
-                        <span className={`text-3xl font-display font-bold ${parseFloat(rrr) > 10 ? 'text-red-600' : 'text-gray-800'}`}>{rrr}</span>
-                     </div>
-                     <div className="flex flex-col items-end">
-                        <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Target</span>
-                        <span className="text-xl font-display font-bold text-gray-700">{matchState.target}</span>
-                     </div>
-                 </div>
-                 {/* Progress Bar Style Indicator */}
-                 <div className="w-full h-1.5 bg-gray-100 rounded-full mt-2 overflow-hidden">
-                     <div className="h-full bg-blue-500 rounded-full" style={{ width: `${Math.min(100, (matchState.currentScore / matchState.target) * 100)}%` }}></div>
-                 </div>
-            </div>
-
+        {/* CONTROLS (Full Width Mobile / 50% Desktop - Left Side) */}
+        <div className="order-2 lg:order-1 flex flex-col gap-3 justify-center h-full">
             {/* ACTION BUTTONS */}
-            <div className="grid grid-cols-2 lg:grid-cols-1 gap-3 lg:gap-4 flex-1">
+            <div className="grid grid-cols-2 gap-3 lg:gap-4 h-32 lg:h-64">
                 <button 
                   onClick={() => handleActionClick('safe')}
                   disabled={isProcessing}
-                  className={`group relative overflow-hidden bg-emerald-600 text-white py-4 lg:py-0 lg:h-full rounded-xl lg:rounded-xl font-bold shadow-md shadow-emerald-600/20 transition-all transform active:scale-[0.98] flex flex-col items-center justify-center ${isProcessing ? 'opacity-80' : 'hover:bg-emerald-700 hover:shadow-lg'}`}
+                  className={`group relative overflow-hidden bg-emerald-600 text-white h-full rounded-xl font-bold shadow-md shadow-emerald-600/20 transition-all transform active:scale-[0.98] flex flex-col items-center justify-center ${isProcessing ? 'opacity-80' : 'hover:bg-emerald-700 hover:shadow-lg'}`}
                 >
                   <div className="relative z-10 flex flex-col items-center">
-                      <span className="text-sm lg:text-lg font-display tracking-widest">TIMING SHOT</span>
-                      <span className="text-[9px] font-normal opacity-80 hidden lg:block mt-1">Low Risk • Rotate Strike</span>
+                      <span className="text-sm lg:text-2xl font-display tracking-widest">TIMING SHOT</span>
+                      <span className="text-[9px] font-normal opacity-80 hidden lg:block mt-2">Low Risk • Rotate Strike</span>
                   </div>
                   <div className="absolute inset-0 bg-white/10 translate-y-full group-hover:translate-y-0 transition-transform duration-300"></div>
                 </button>
@@ -170,22 +119,53 @@ export const MatchDisplay: React.FC<Props> = ({ matchState, players, bowlingTeam
                 <button 
                   onClick={() => handleActionClick('hard')}
                   disabled={isProcessing}
-                  className={`group relative overflow-hidden bg-rose-600 text-white py-4 lg:py-0 lg:h-full rounded-xl lg:rounded-xl font-bold shadow-md shadow-rose-600/20 transition-all transform active:scale-[0.98] flex flex-col items-center justify-center ${isProcessing ? 'opacity-80' : 'hover:bg-rose-700 hover:shadow-lg'}`}
+                  className={`group relative overflow-hidden bg-rose-600 text-white h-full rounded-xl font-bold shadow-md shadow-rose-600/20 transition-all transform active:scale-[0.98] flex flex-col items-center justify-center ${isProcessing ? 'opacity-80' : 'hover:bg-rose-700 hover:shadow-lg'}`}
                 >
                   <div className="relative z-10 flex flex-col items-center">
-                      <span className="text-sm lg:text-lg font-display tracking-widest">POWER HIT</span>
-                       <span className="text-[9px] font-normal opacity-80 hidden lg:block mt-1">High Risk • Boundaries</span>
+                      <span className="text-sm lg:text-2xl font-display tracking-widest">POWER HIT</span>
+                       <span className="text-[9px] font-normal opacity-80 hidden lg:block mt-2">High Risk • Boundaries</span>
                   </div>
                   <div className="absolute inset-0 bg-white/10 translate-y-full group-hover:translate-y-0 transition-transform duration-300"></div>
                 </button>
             </div>
             
             <div className="text-center hidden lg:block">
-                 <p className="text-[10px] text-gray-400 font-medium">
+                 <p className="text-xs text-gray-400 font-medium">
                     {parseFloat(rrr) > 12 ? "Pressure is building! Focus on timing." : "Steady the ship and keep the scoreboard ticking."}
                  </p>
             </div>
+        </div>
 
+        {/* VISUALIZER (Full Width Mobile / 50% Desktop - Right Side) */}
+        <div className="order-1 lg:order-2 flex flex-col relative h-full min-h-[200px] lg:min-h-[400px]">
+             
+             {/* DESKTOP: Overlay Context (Pitch/FreeHit) */}
+             <div className="hidden lg:flex absolute top-4 right-4 z-20 gap-2">
+                 <span className={`px-3 py-1 rounded-full text-xs font-bold border backdrop-blur-sm bg-white/80 ${matchState.pitchType === 'GREEN' ? 'text-green-700 border-green-200' : matchState.pitchType === 'DUSTY' ? 'text-amber-800 border-amber-200' : 'text-slate-700 border-slate-200'}`}>
+                    {matchState.pitchType} PITCH
+                 </span>
+                 {matchState.isFreeHit && <span className="px-3 py-1 rounded-full text-xs font-bold bg-red-500 text-white shadow-sm animate-pulse">FREE HIT</span>}
+             </div>
+
+             <div className="flex-1 bg-slate-50 rounded-xl border border-slate-100 relative flex items-center justify-center overflow-hidden group shadow-inner">
+                 <div className={`relative z-10 w-24 h-24 lg:w-40 lg:h-40 rounded-full flex items-center justify-center text-4xl lg:text-7xl font-display font-bold shadow-xl transition-all duration-300 ease-out transform ${resultColor} ${resultScale} ${lastBall ? 'opacity-100' : 'opacity-0 scale-50'}`}>
+                   {lastBall}
+                   {lastDetail && <div className="absolute -bottom-5 lg:-bottom-6 left-1/2 transform -translate-x-1/2 text-[9px] lg:text-[10px] bg-gray-900 text-white px-2 py-0.5 rounded-full whitespace-nowrap shadow-md z-20">{lastDetail}</div>}
+                </div>
+                
+                {/* Decoration Rings */}
+                <div className="absolute w-40 h-40 lg:w-72 lg:h-72 border border-gray-200 rounded-full animate-ping-slow opacity-20"></div>
+                <div className="absolute w-60 h-60 lg:w-[28rem] lg:h-[28rem] border border-gray-100 rounded-full opacity-10"></div>
+
+                 {/* Commentary Bubble */}
+                {matchState.commentary && (
+                   <div className="absolute bottom-4 lg:bottom-12 w-full text-center px-4 transition-all duration-300 z-20">
+                     <span className="inline-block bg-white/95 backdrop-blur-md border border-gray-200 text-gray-800 px-3 py-1.5 lg:px-6 lg:py-3 rounded-xl text-xs lg:text-lg font-medium shadow-sm max-w-full lg:max-w-2xl">
+                       {matchState.commentary}
+                     </span>
+                   </div>
+                 )}
+            </div>
         </div>
 
       </div>
