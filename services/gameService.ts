@@ -142,10 +142,8 @@ export const playBall = (
   const ballsInOver = ballsBowled % 6;
   const runsNeeded = Math.max(0, state.target - state.currentScore);
   const ballsRemaining = (state.totalOvers * 6) - ballsBowled;
-  const rrr = ballsRemaining > 0 ? (runsNeeded / (ballsRemaining / 6)) : 99;
   
   const strikerStats = state.batsmen.stats[striker.id];
-  
   const isDeathOvers = ballsBowled >= 90;
   
   // 2. BASE WEIGHTS (Dynamic Randomization)
@@ -157,25 +155,29 @@ export const playBall = (
   };
 
   if (action === 'safe') {
-      // SAFE MODE: 0, 1, 2, 3 Only. No 4, 6, W.
-      weights['0'] = 35 * noise(); // Increased pressure (dots)
-      weights['1'] = 42 * noise();
-      weights['2'] = 13 * noise();
-      weights['3'] = 10 * noise(); // Increased chance of 3s
-      // Enforce 0
+      // SAFE MODE: 
+      // User Req: Increase chances of 3s and 0s to balance logic.
+      weights['0'] = 25 * noise(); // Increased risk of dot
+      weights['1'] = 40 * noise(); // Standard single
+      weights['2'] = 20 * noise(); // Reduced twos slightly
+      weights['3'] = 15 * noise(); // Increased chance of 3
+      // Enforce 0 for Hard actions
       weights['4'] = 0;
       weights['6'] = 0;
       weights['W'] = 0;
   } else {
-      // HARD MODE: 0, 4, 6, W Only. No 1, 2, 3.
-      weights['0'] = 32 * noise(); // Increased Swing and miss
-      weights['4'] = 38 * noise(); // Increased boundaries (4s)
-      weights['6'] = 12 * noise(); // Reduced sixes
-      weights['W'] = 18 * noise(); // Reduced wickets (High Risk)
-      // Enforce 0
+      // HARD MODE: 
+      // User Req: Game is one sided. Nerf boundaries, increase 0, 3, and W.
+      
+      weights['6'] = 30 * noise(); // Reduced from 40 (Harder to hit sixes)
+      weights['4'] = 25 * noise(); // Reduced from 30
+      weights['3'] = 25 * noise(); // Increased significantly (Mishits happen more often)
+      weights['W'] = 15 * noise(); // Increased risk (was 10)
+      weights['0'] = 25 * noise(); // Increased significantly (Swing and miss common)
+
+      // Enforce 0 for Safe-only actions (1 and 2 excluded)
       weights['1'] = 0;
       weights['2'] = 0;
-      weights['3'] = 0;
   }
 
   // 3. ACTION MODIFIERS & GAME LOGIC
@@ -186,13 +188,15 @@ export const playBall = (
   newState.recentActions = history;
   
   const isSpamming = history.length >= 3 && history.slice(-3).every(a => a === action);
-  // Only penalize 50% of the time to keep user guessing
-  if (isSpamming && Math.random() > 0.5) {
+  
+  // Penalize spamming more aggressively
+  if (isSpamming && Math.random() > 0.4) {
       if (action === 'hard') {
-          weights['W'] += 35; // Significant increase in wicket risk
-          commentary = "Bowler predicted the slog!";
+          weights['W'] += 30; // High risk of wicket if spamming slog
+          weights['0'] += 30; // High chance of dot
+          commentary = "Bowler reads the telegraph! Swing and a miss.";
       } else {
-          weights['0'] += 40; // Significant increase in dot balls
+          weights['0'] += 35; // Dots increase for spamming safe
           commentary = "Field tightens, no gaps found.";
       }
   }
@@ -200,40 +204,39 @@ export const playBall = (
   // Rule 2: Heat Check (Prevent continuous boundaries in Hard mode)
   if (action === 'hard') {
     const ballsSinceBoundary = ballsBowled - state.matchEvents.lastBoundaryBall;
-    if (ballsSinceBoundary === 1) {
-        weights['W'] += 15; // Risk of getting out after a boundary
-        weights['0'] += 10;
-        weights['6'] -= 5;
+    if (ballsSinceBoundary < 2) { // If boundary was very recent
+        weights['W'] += 15; // Increased risk
+        weights['0'] += 20; // Swing and miss likely
+        weights['6'] -= 15; // Harder to hit back-to-back
     }
   }
 
   // Rule 3: Collapse Guard (Mercy Rule)
-  // Only applies if user is doing terribly, reduces Wicket chance in Hard mode
   const earlyCollapse = state.wickets >= 5 && overs < 8;
   if (earlyCollapse && action === 'hard') {
-      weights['W'] *= 0.3; // Reduce wicket chance to extend game
-      weights['0'] += 20;  // More dots instead of wickets
+      weights['W'] = 5; // Reduce wicket chance slightly
+      weights['0'] += 15;  // Dots instead
+      weights['3'] += 20;  // Recovery shots
   }
 
   // Rule 4: Skill Gap
   const skillDiff = striker.battingSkill - bowler.bowlingSkill;
   if (action === 'hard') {
-      if (skillDiff > 20) { weights['4'] += 10; weights['6'] += 10; }
-      else if (skillDiff < -20) { weights['W'] += 15; weights['0'] += 10; }
+      if (skillDiff > 20) { weights['6'] += 10; weights['4'] += 10; }
+      else if (skillDiff < -20) { weights['W'] += 15; weights['0'] += 20; }
   } else {
       // Safe mode skill impact
-      if (skillDiff > 20) { weights['1'] += 15; weights['2'] += 10; }
-      else if (skillDiff < -20) { weights['0'] += 20; }
+      if (skillDiff > 20) { weights['1'] += 15; weights['2'] += 15; }
+      else if (skillDiff < -20) { weights['0'] += 30; }
   }
 
   // Rule 5: Death Overs
   if (isDeathOvers && action === 'hard') {
-      weights['6'] += 15;
-      weights['W'] += 10; // Carnage
+      weights['6'] += 15; // Easier to hit sixes at death
+      weights['W'] += 10; // But risk also increases
   }
 
   // --- STRICT ENFORCEMENT ---
-  // Ensure strict mode rules are not violated by modifiers
   if (action === 'safe') {
       weights['4'] = 0;
       weights['6'] = 0;
@@ -241,7 +244,6 @@ export const playBall = (
   } else {
       weights['1'] = 0;
       weights['2'] = 0;
-      weights['3'] = 0;
   }
 
   // 5. RESOLVE OUTCOME
@@ -264,21 +266,21 @@ export const playBall = (
   newState.ballsBowled += 1;
 
   // Lucky Edge: 0 -> 4 (Only valid in Hard Mode)
-  if (outcome === '0' && action === 'hard' && Math.random() < 0.05) {
+  if (outcome === '0' && action === 'hard' && Math.random() < 0.08) { 
       outcome = '4';
       detailDisplay = 'Edge';
       commentary = "Thick edge... flies past slip for FOUR! Lucky.";
   }
 
   // Great Catch: 6 -> W (Only valid in Hard Mode)
-  if (outcome === '6' && Math.random() < 0.03) {
+  if (outcome === '6' && Math.random() < 0.04) { 
       outcome = 'W';
       detailDisplay = 'Stunner';
       commentary = "He's hit that well but... CAUGHT! Absolute blinder on the ropes!";
   }
 
   // DRS Save: W -> 0 (Only valid in Hard Mode)
-  if (outcome === 'W' && Math.random() < 0.08) {
+  if (outcome === 'W' && Math.random() < 0.10) { 
       outcome = '0';
       detailDisplay = 'DRS';
       commentary = "Given OUT! Review taken... Missing leg! NOT OUT.";
@@ -302,7 +304,7 @@ export const playBall = (
         else if (runs === 4) commentary = "Classy shot, finds the gap for four.";
         else if (runs === 1) commentary = "Quick single taken.";
         else if (runs === 2) commentary = "Good running, they come back for two.";
-        else if (runs === 3) commentary = "Great placement! They push hard for three.";
+        else if (runs === 3) commentary = action === 'hard' ? "Mistimed slog, but it lands safe! They get three." : "Great placement! They push hard for three.";
         else if (runs === 0) commentary = action === 'hard' ? "Swing and a miss!" : "Solid defense.";
       }
   }
@@ -421,3 +423,4 @@ export const playBall = (
 
   return newState;
 };
+
